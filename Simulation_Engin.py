@@ -120,15 +120,6 @@ class Simulation:
                             turns += [f"{d.name}-{next_zone}"]
                         continue
 
-                    print(next_zone)
-                    print(self.number_drones_in_zone[next_zone])
-                    print(self.max_drones_for_this_zone[next_zone])
-                    if (
-                        self.number_drones_in_zone[next_zone] ==
-                        self.max_drones_for_this_zone[next_zone]
-                    ):
-                        print("hello")
-                        continue
                     if (
                         nmbr_drones_on_road[f"{next_zone}-{current_zone}"] <
                         min(

@@ -48,6 +48,7 @@ def main(map: list[Any]) -> None:
             "unreachable from the start_hub."
             "Please check the connections in the map file."
             )
+    print(f"pathsm ---> {best_pathes}")
     simulation: Simulation = Simulation(ob.zones, ob.connections, ob.nb_drones,
                                         best_pathes, graph, end[0])
     turns: list[list[str]] = simulation.drones_tracker()
