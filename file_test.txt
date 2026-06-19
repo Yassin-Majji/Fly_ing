@@ -1,24 +1,32 @@
-nb_drones: 10
-start_hub: start 0 0
-end_hub: end 10 10
+nb_drones: 25
+start_hub: start 0 5 [color=green]
+end_hub: goal 10 5 [color=black]
 
-# العقد (Zones)
-hub: A 2 2 [zone=normal max_drones=1]
-hub: B 4 4 [zone=normal max_drones=2]
-hub: C 6 6 [zone=restricted max_drones=2]
-hub: D 2 8 [zone=normal max_drones=1]
-hub: E 4 8 [zone=normal max_drones=1]
-hub: F 6 8 [zone=normal max_drones=1]
+# المسار الأول (العلوي) - طوله 3 خطوات
+hub: top1 3 8 [color=blue]
+hub: top2 7 8 [color=blue]
 
-# الروابط (Connections)
-connection: start-A [max_link_capacity=1]
-connection: A-end [max_link_capacity=1]
+# المسار الثاني (الأوسط) - طوله 3 خطوات
+hub: mid1 3 5 [color=black]
+hub: mid2 7 5 [color=red]
 
-connection: start-B [max_link_capacity=2]
-connection: B-C [max_link_capacity=2]
-connection: C-end [max_link_capacity=2]
+# المسار الثالث (السفلي) - طوله 4 خطوات (أطول بخطوة)
+hub: bot1 3 2 [color=black]
+hub: bot2 5 2 [color=gray]
+hub: bot3 7 2 [color=gray]
 
-connection: start-D [max_link_capacity=1]
-connection: D-E [max_link_capacity=1]
-connection: E-F [max_link_capacity=1]
-connection: F-end [max_link_capacity=1]
+# روابط المسار العلوي
+connection: start-top1
+connection: top1-top2
+connection: top2-goal
+
+# روابط المسار الأوسط
+connection: start-mid1
+connection: mid1-mid2
+connection: mid2-goal
+
+# روابط المسار السفلي
+connection: start-bot1
+connection: bot1-bot2
+connection: bot2-bot3
+connection: bot3-goal
