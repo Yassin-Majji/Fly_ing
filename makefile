@@ -1,12 +1,11 @@
-# Variables
 PYTHON = python3
 MAIN = main.py
+FILE = maps/easy/01_linear_path.txt
 
 .PHONY: install run debug clean lint lint-strict
 
-# Execute the main script
 run:
-	$(PYTHON) $(MAIN)
+	$(PYTHON) $(MAIN) $(FILE)
 
 install:
 	pip install pydantic flake8 mypy

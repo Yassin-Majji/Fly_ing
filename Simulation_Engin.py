@@ -57,12 +57,25 @@ class Simulation:
                 drone_costs += [(p[1] + number_drones_in_paths[i] // p[2], i)]
             chosen_path: tuple[int, int] = min(drone_costs, key=lambda t: t[0])
             number_drones_in_paths[chosen_path[1]] += 1
-            self.drones += [Drone('D' + str(j + 1),
+            self.drones += [Drone(j, 'D' + str(j + 1),
                                   self.paths[chosen_path[1]][0])]
+
+    def sort_drones_for_turn(self):
+        def sorting_key(drone):
+            priority_1 = 0 if drone.in_link else 1
+
+            priority_2 = len(drone.path) - drone.current_index
+
+            return (priority_1, priority_2)
+
+        sorted_drones = sorted(self.drones, key=sorting_key)
+
+        return sorted_drones
 
     def drones_tracker(self) -> list[list[str]]:
         self.drones_setup()
         self.determine_max_drones_in_link()
+
         while True:
             turns: list[str] = []
             nmbr_drones_on_road: dict[str, int] = {}
@@ -70,92 +83,52 @@ class Simulation:
             for c in self.connections:
                 nmbr_drones_on_road[f'{c.zon1}-{c.zon2}'] = 0
                 nmbr_drones_on_road[f'{c.zon2}-{c.zon1}'] = 0
-            number_drones_to_goal: dict[str, int] = {z[1]: 0
-                                                     for z in self.graph
-                                                     [self.end]}
+            drones = self.sort_drones_for_turn()
 
-            i: int
-            d: Drone
-            for i, d in enumerate(self.drones):
-
+            for d in drones:
                 if all(self.on_the_goal):
                     return self.results
 
                 if d.is_on_the_goal():
+                    self.on_the_goal[d.id] = True
                     continue
 
-                current_zone: str = d.get_current_zone()
+                current_zone = d.get_current_zone()
+                next_zone = d.get_next_zone()
 
-                next_zone: str = d.get_next_zone()
-
-                if d.on_the_link():
-                    d.in_link = False
-
+                if d.in_link:
                     d.move()
-
-                    turns += [f"{d.name}-{next_zone}"]
-
-                    if next_zone == self.end:
-                        self.on_the_goal[i] = True
-
+                    d.in_link = False
+                    turns.append(f"{d.name}-{next_zone}")
                     continue
 
-                next_zone_type: Any = [z.type for z in self.zones
-                                       if z.name == next_zone][0]
+                if (
+                    self.number_drones_in_zone[next_zone] == self.max_drones_for_this_zone[next_zone]
+                    or nmbr_drones_on_road[f"{next_zone}-{current_zone}"]
+                    == min(
+                        self.max_drones_for_this_link[f"{next_zone}-{current_zone}"],
+                        self.max_drones_for_this_zone[next_zone]
+                           )
+                ):
+                    continue
 
+                next_zone_type = [z.type for z in self.zones if z.name == next_zone][0]
                 if next_zone_type != 'normal':
                     next_zone_type = next_zone_type.value
 
-                if next_zone_type == 'normal' or next_zone_type == 'priority':
-                    if next_zone == self.end:
-                        if (
-                            number_drones_to_goal[current_zone] <
-                            self.max_drones_for_this_link
-                            [f"{next_zone}-{current_zone}"]
-                        ):
-                            d.move()
-                            self.on_the_goal[i] = True
-                            number_drones_to_goal[current_zone] += 1
-                            self.number_drones_in_zone[current_zone] -= 1
-                            turns += [f"{d.name}-{next_zone}"]
-                        continue
-
-                    if (
-                        nmbr_drones_on_road[f"{next_zone}-{current_zone}"] <
-                        min(
-                            self.max_drones_for_this_zone[next_zone],
-                            self.max_drones_for_this_link
-                            [f"{next_zone}-{current_zone}"]
-                            )
-                    ):
-                        d.move()
-                        self.number_drones_in_zone[current_zone] -= 1
-                        self.number_drones_in_zone[next_zone] += 1
-                        turns += [f"{d.name}-{next_zone}"]
-                        nmbr_drones_on_road[f"{next_zone}-{current_zone}"] += 1
+                if next_zone_type in ('normal', 'priority'):
+                    d.move()
+                    nmbr_drones_on_road[f"{next_zone}-{current_zone}"] += 1
+                    self.number_drones_in_zone[next_zone] += 1
+                    self.number_drones_in_zone[current_zone] -= 1
+                    turns.append(f"{d.name}-{next_zone}")
 
                 else:
-                    if (
-                        nmbr_drones_on_road[f"{next_zone}-{current_zone}"] <
-                        min(
-                            self.max_drones_for_this_zone[next_zone],
-                            self.max_drones_for_this_link
-                            [f"{next_zone}-{current_zone}"]
-                            )
-                    ):
-                        if next_zone == self.end:
-                            if (
-                                number_drones_to_goal[current_zone] <
-                                self.max_drones_for_this_link
-                                [f"{next_zone}-{current_zone}"]
-                            ):
-                                self.number_drones_in_zone[current_zone] -= 1
-
-                        d.in_link = True
-                        turns += [f"{d.name}-{current_zone}-{next_zone}"]
-                        self.number_drones_in_zone[current_zone] -= 1
-                        self.number_drones_in_zone[current_zone] += 1
-                        nmbr_drones_on_road[f"{next_zone}-{current_zone}"] += 1
+                    d.in_link = True
+                    nmbr_drones_on_road[f"{next_zone}-{current_zone}"] += 1
+                    self.number_drones_in_zone[next_zone] += 1
+                    self.number_drones_in_zone[current_zone] -= 1
+                    turns.append(f"{d.name}-{current_zone}-{next_zone}")
 
             self.results.append(turns)
 

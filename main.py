@@ -7,10 +7,14 @@ from paths_finder import PathFinder
 from Simulation_Engin import Simulation
 from colors import ANSI_COLORS
 from typing import Any
+from sys import argv
 
 
 def main(map: list[Any]) -> None:
-    ob: Any = ParseMap("maps/challenger/01_the_impossible_dream.txt")
+    if len(argv) <= 1: 
+        print("errrrrrrrrrror")
+        exit()
+    ob: Any = ParseMap(argv[1])
     ob.read_lines()
     map[0] = ob.map
     keys: list[str] = [D['key'] for D in map[0]['zones']]
