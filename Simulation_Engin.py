@@ -137,11 +137,11 @@ class Simulation:
 
                     turns.append(f"{d.name}-{current_zone}-{next_zone}")
 
-            self.results.append(turns)
+            if turns:
+                self.results.append(turns)
 
     def put_turns(self, turns: list[list[str]],
                   colors: dict[str, str]) -> None:
-
         t: list[str]
 
         for t in turns:
