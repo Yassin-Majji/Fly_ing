@@ -17,7 +17,7 @@ class Graph:
         elif type_zon == 'restricted':
             return 2.0
         else:
-            return 99999.0
+            return 1.0
 
     def zone_type(self, zone_name: str) -> Any:
         z: Any

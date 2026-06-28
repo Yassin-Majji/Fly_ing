@@ -27,7 +27,9 @@ The project is implemented using an object-oriented architecture and models the 
 ### Requirements
 
 * Python 3.10+
-* pip
+* pydantic
+* mypy
+* flake8
 
 ### Install Dependencies
 
@@ -43,15 +45,11 @@ This command installs the required packages:
 
 ### Run the Simulation
 
+To run the simulation, pass the map file to the run command:
 ```bash
-make run
+make run FILE=maps/easy.txt
 ```
-
-or
-
-```bash
-python3 main.py
-```
+*(or manually: `python3 main.py maps/easy.txt`)*
 
 ### Run Linting
 
@@ -115,7 +113,7 @@ Traversal costs are adjusted according to zone types:
 
 ### Load Balancing Strategy
 
-Using a single shortest path for every drone quickly creates congestion.
+Using a shortest path for every drone quickly creates congestion.
 
 To mitigate this issue:
 
@@ -126,16 +124,6 @@ To mitigate this issue:
 5. Multiple path combinations are evaluated.
 
 This strategy encourages traffic distribution across the graph.
-
-### Bottleneck Analysis
-
-Before the simulation starts, candidate paths are evaluated based on:
-
-* Zone capacities
-* Link capacities
-* Estimated traffic flow
-
-The path combination expected to minimize the total number of turns is selected.
 
 ### Simulation Engine
 
@@ -175,6 +163,32 @@ The visualization is lightweight and works directly in the terminal without requ
 
 ---
 
+## 📋 Example Input (Map File)
+
+```text
+nb_drones: 2
+
+start_hub: start 0 0
+end_hub: goal 0 2
+
+hub: mid 0 1
+
+connection: start-mid
+connection: mid-goal
+```
+
+---
+
+## 📤 Example Output (Simulation Turns)
+
+```text
+D1-mid
+D1-goal D2-mid
+D2-goal
+```
+
+---
+
 ## 📚 Resources
 
 The following resources were particularly useful during the development of this project:
@@ -182,7 +196,7 @@ The following resources were particularly useful during the development of this 
 ### Graph Theory
 
 * Graph Theory Overview
-  https://en.wikipedia.org/wiki/Graph_theory
+  https://www.youtube.com/watch?v=7zZ-VhLOy6M
 
 ### Dijkstra's Algorithm
 
@@ -191,17 +205,6 @@ The following resources were particularly useful during the development of this 
 
 * Dijkstra's Algorithm (Wikipedia)
   https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
-
-
-### Multi-Agent Routing Concepts
-
-* Multi-Agent Path Finding (MAPF)
-  https://mapf.info/
-
-### Simulation Concepts
-
-* Discrete-Event Simulation
-  https://en.wikipedia.org/wiki/Discrete-event_simulation
 
 ### AI Usage
 
@@ -212,5 +215,3 @@ AI was used for:
 * Exploring simulation engine design.
 * Brainstorming load-balancing and routing strategies.
 * Investigating difficult bugs and implementation challenges.
-
-All architectural decisions, implementation details, debugging, testing, and final code were completed by the author.

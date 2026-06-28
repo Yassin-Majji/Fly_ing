@@ -4,7 +4,9 @@ from typing import cast, Any, List, Tuple
 
 class ParseMap:
     def __init__(self, filename: str) -> None:
+
         self.filename: str = filename
+
         self.map: ParsedMap = {
             "zones": [],
             "connections": [],
@@ -30,11 +32,19 @@ class ParseMap:
                 line: str = line_raw.strip()
 
                 star: int = line.find(':')
+
                 if star != -1:
                     i: int = star
+
                     while star > 0 and line[star - 1] == " ":
                         star -= 1
+
                     line = line[:star] + ":" + line[i + 1:]
+
+                hachtag_index: int = line.find('#')
+
+                if hachtag_index != -1:
+                    line = line[0:hachtag_index]
 
                 if not line or line.startswith("#"):
                     continue
@@ -193,6 +203,8 @@ class ParseMap:
                 "1 and 3 valid attributes (zone, color, max_drones)."
                 )
 
+        zone_attributes: list = []
+
         for d in data:
 
             if '=' not in d:
@@ -201,7 +213,6 @@ class ParseMap:
                     f"{line_number}.\n[{line_number}] {line}\n"
                     "Reason: Each attribute must follow the 'key=value' "
                     f"format (missing '=' in '{d}')."
-
                 )
 
             key: str
@@ -223,9 +234,25 @@ class ParseMap:
                     "Allowed keys are: 'color', 'zone', 'max_drones'."
 
                 )
+
+            zone_attributes += [key]
+
             if key == 'zone':
                 key = 'type'
             res[key] = value
+
+        seen = set()
+
+        for attribut in zone_attributes:
+            if attribut in seen:
+                raise ValueError(
+                    f"Parse Error: Duplicate metadata attribute '{attribut}' "
+                    f"at line {line_number}.\n[{line_number}] {line}\n"
+                    f"Reason: The attribute '{attribut}' was defined more "
+                    "than once. Each metadata key can only be specified "
+                    "a single time."
+                    )
+            seen.add(attribut)
 
         return res
 
@@ -343,6 +370,17 @@ class ParseMap:
                 )
         k: str
         v: str
+
+        data = metadata.strip().split()
+
+        if len(data) != 1:
+            raise ValueError(
+                f"Parse Error: Invalid metadata format at line "
+                f"{line_number}.\n[{line_number}] {line}\n"
+                "Reason: Metadata must not contain spaces and should be a "
+                "single expression (e.g., [max_link_capacity=2])."
+                )
+
         k, v = metadata.strip().split('=')
 
         if not k or not v:
@@ -353,5 +391,12 @@ class ParseMap:
                 "the value must be provided around the '=' sign"
                 "(e.g., [max_link_capacity=2])."
                     )
+        if k != "max_link_capacity":
+            raise ValueError(
+                f"Parse Error: Unsupported metadata key '{k}' at line "
+                f"{line_number}.\n[{line_number}] {line}\n"
+                "Reason: The only supported metadata key is "
+                "'max_link_capacity' (e.g., [max_link_capacity=2])."
+                )
 
         return {k: v}
